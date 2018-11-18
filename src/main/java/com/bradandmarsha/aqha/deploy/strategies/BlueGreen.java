@@ -17,5 +17,8 @@ public class BlueGreen extends DeploymentStrategy {
         System.out.println("Executing BlueGreen replacement of application " + this.getOldApplication().getApplicationFullName() +
                 " with application " + this.getNewApplication().getApplicationFullName());
         this.getNewApplication().create();
+
+        DeploymentStrategy strategy = new Destroy(this.getOldApplication(), this.getNewApplication());
+        strategy.deploy();
     }
 }
