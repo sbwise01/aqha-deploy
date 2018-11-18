@@ -3,6 +3,7 @@ package com.bradandmarsha.aqha.deploy.resources;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.CreateAutoScalingGroupRequest;
+import com.amazonaws.services.autoscaling.model.DeleteAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.LaunchTemplateSpecification;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
@@ -20,6 +21,15 @@ public class aqhaAutoScalingGroup {
     
     public aqhaAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
         this.autoScalingGroup = autoScalingGroup;
+    }
+
+    public void destroy(aqhaConfiguration configuration) {
+        AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
+        DeleteAutoScalingGroupRequest request = new DeleteAutoScalingGroupRequest()
+                .withAutoScalingGroupName(autoScalingGroup.getAutoScalingGroupName())
+                //TODO change this to use a normal progress delete.
+                .withForceDelete(Boolean.TRUE);
+        client.deleteAutoScalingGroup(request);
     }
     
     public static List<aqhaAutoScalingGroup> retrieveAutoScalingGroups(aqhaConfiguration configuration,

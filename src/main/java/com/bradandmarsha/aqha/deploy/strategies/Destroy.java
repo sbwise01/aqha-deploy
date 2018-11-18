@@ -15,5 +15,6 @@ public class Destroy extends DeploymentStrategy {
     @Override
     public void deploy() {
         System.out.println("Destroying application " + this.getOldApplication().getApplicationFullName());
+        this.getOldApplication().destroy();
     }
 }

@@ -3,6 +3,7 @@ package com.bradandmarsha.aqha.deploy.resources;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateLaunchTemplateRequest;
 import com.amazonaws.services.ec2.model.CreateLaunchTemplateResult;
+import com.amazonaws.services.ec2.model.DeleteLaunchTemplateRequest;
 import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
 import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesRequest;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
@@ -26,6 +27,13 @@ public class aqhaLaunchTemplate {
         this.launchTemplateVersion = launchTemplateVersion;
     }
     
+    public void destroy(aqhaConfiguration configuration) {
+        AmazonEC2Client client = Client.getEC2Client(configuration.getRegion());
+        DeleteLaunchTemplateRequest request = new DeleteLaunchTemplateRequest()
+                .withLaunchTemplateId(launchTemplate.getLaunchTemplateId());
+        client.deleteLaunchTemplate(request);
+    }
+
     public static List<aqhaLaunchTemplate> retrieveLaunchTemplates(aqhaConfiguration configuration) {
         List<aqhaLaunchTemplate> launchTemplates = new ArrayList<>();
         AmazonEC2Client client = Client.getEC2Client(configuration.getRegion());

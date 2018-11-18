@@ -61,6 +61,14 @@ public class aqhaApplication {
                 getApplicationFullName(), launchTemplate.getLaunchTemplate());
     }
     
+    public void destroy() {
+        //Destroy AutoScalingGroup
+        autoScalingGroup.destroy(configuration);
+
+        //Destroy LaunchTemplate
+        launchTemplate.destroy(configuration);
+    }
+
     public String getApplicationFullName() {
         if (launchTemplate == null) {
             return configuration.getApplicationName() +
