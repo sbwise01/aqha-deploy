@@ -71,6 +71,7 @@ public class aqhaLaunchTemplate {
         RequestLaunchTemplateData launchTemplateData = new RequestLaunchTemplateData()
                 .withImageId(configuration.getAmiId())
                 .withInstanceType(configuration.getInstanceType())
+                .withSecurityGroupIds(configuration.getSecurityGroupIds())
                 .withKeyName(configuration.getKeyName());
         CreateLaunchTemplateRequest request = new CreateLaunchTemplateRequest()
                 .withLaunchTemplateName(launchTemplateName)

@@ -24,6 +24,7 @@ public class aqhaConfiguration {
     private final Integer minSize;
     private final Integer desiredCapacity;
     private final List<String> subnetIds;
+    private final List<String> securityGroupIds;
     
     @JsonCreator
     public aqhaConfiguration(@JsonProperty("applicationName") String applicationName,
@@ -35,7 +36,8 @@ public class aqhaConfiguration {
             @JsonProperty("maxSize") Integer maxSize,
             @JsonProperty("minSize") Integer minSize,
             @JsonProperty("desiredCapacity") Integer desiredCapacity,
-            @JsonProperty("subnetIds") List<String> subnetIds) {
+            @JsonProperty("subnetIds") List<String> subnetIds,
+            @JsonProperty("securityGroupIds") List<String> securityGroupIds) {
         this.applicationName = applicationName;
         this.stackName = stackName;
         this.region = region;
@@ -46,6 +48,7 @@ public class aqhaConfiguration {
         this.minSize = minSize;
         this.desiredCapacity = desiredCapacity;
         this.subnetIds = subnetIds;
+        this.securityGroupIds = securityGroupIds;
     }
     
     @Override
@@ -127,5 +130,12 @@ public class aqhaConfiguration {
      */
     public List<String> getSubnetIds() {
         return subnetIds;
+    }
+
+    /**
+     * @return the securityGroupIds
+     */
+    public List<String> getSecurityGroupIds() {
+        return securityGroupIds;
     }
 }

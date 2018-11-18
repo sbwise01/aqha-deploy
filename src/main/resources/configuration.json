@@ -3,7 +3,7 @@
     "stackName": "staging",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-061e7ebbc234015fe",
+    "amiId": "ami-05c4d3b2cae4c2853",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -12,5 +12,8 @@
         "subnet-7af9ec33",
         "subnet-ac4fc6f7",
         "subnet-d61cefb0"
+    ],
+    "securityGroupIds": [
+        "sg-08ba1c668aa7b453c"
     ]
 }
