@@ -1,6 +1,7 @@
 package com.bradandmarsha.aqha.deploy.strategies;
 
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
+import java.io.IOException;
 
 /**
  *
@@ -13,7 +14,7 @@ public class Destroy extends DeploymentStrategy {
     }
 
     @Override
-    public void deploy() {
+    public void deploy() throws IOException {
         System.out.println("Destroying application " + this.getOldApplication().getApplicationFullName());
         this.getOldApplication().destroy();
     }

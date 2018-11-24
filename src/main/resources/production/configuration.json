@@ -1,0 +1,25 @@
+{
+    "applicationName": "bradTest",
+    "stackName": "production",
+    "region": "us-west-2",
+    "instanceType": "t2.small",
+    "amiId": "ami-05b2773f6ed3fdc0a",
+    "keyName": "bwise-keypair",
+    "maxSize": 1,
+    "minSize": 1,
+    "desiredCapacity": 1,
+    "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
+    "aqhaChefSoloBootstrap": {
+        "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/production/chef",
+        "bucket": "brad-chef-bootstrap",
+        "key": "production.tar.gz"
+    },
+    "subnetIds": [
+        "subnet-7af9ec33",
+        "subnet-ac4fc6f7",
+        "subnet-d61cefb0"
+    ],
+    "securityGroupIds": [
+        "sg-08ba1c668aa7b453c"
+    ]
+}

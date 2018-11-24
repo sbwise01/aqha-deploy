@@ -7,12 +7,16 @@ import com.amazonaws.services.ec2.model.DeleteLaunchTemplateRequest;
 import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
 import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesRequest;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
+import com.amazonaws.services.ec2.model.LaunchTemplateIamInstanceProfileSpecificationRequest;
 import com.amazonaws.services.ec2.model.LaunchTemplateVersion;
 import com.amazonaws.services.ec2.model.RequestLaunchTemplateData;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
 import com.bradandmarsha.aqha.deploy.utils.Client;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -32,6 +36,9 @@ public class aqhaLaunchTemplate {
         DeleteLaunchTemplateRequest request = new DeleteLaunchTemplateRequest()
                 .withLaunchTemplateId(launchTemplate.getLaunchTemplateId());
         client.deleteLaunchTemplate(request);
+        if (configuration.getChefSoloBootstrap() != null) {
+            configuration.getChefSoloBootstrap().destroyConfiguration(configuration, getLaunchTemplateName());
+        }
     }
 
     public static List<aqhaLaunchTemplate> retrieveLaunchTemplates(aqhaConfiguration configuration) {
@@ -66,13 +73,28 @@ public class aqhaLaunchTemplate {
         return launchTemplateVersion;
     }
     
-    public static aqhaLaunchTemplate createNewLaunchTemplate(aqhaConfiguration configuration, String launchTemplateName) {
+    public static aqhaLaunchTemplate createNewLaunchTemplate(aqhaConfiguration configuration, String launchTemplateName) throws IOException {
         AmazonEC2Client client = Client.getEC2Client(configuration.getRegion());
         RequestLaunchTemplateData launchTemplateData = new RequestLaunchTemplateData()
                 .withImageId(configuration.getAmiId())
                 .withInstanceType(configuration.getInstanceType())
                 .withSecurityGroupIds(configuration.getSecurityGroupIds())
                 .withKeyName(configuration.getKeyName());
+        //Add user data
+        if (configuration.getChefSoloBootstrap() != null) {
+            configuration.getChefSoloBootstrap().uploadConfiguration(configuration, launchTemplateName);
+            JSONObject userData = new JSONObject();
+            userData.put("bucket", configuration.getChefSoloBootstrap().getBucket());
+            userData.put("key", configuration.getChefSoloBootstrap().getKey(launchTemplateName));
+            launchTemplateData.setUserData(Base64.getEncoder().encodeToString(userData.toJSONString().getBytes()));
+        }
+        //Add instance profile
+        if (configuration.getInstanceProfile() != null) {
+            LaunchTemplateIamInstanceProfileSpecificationRequest iamInstanceProfile =
+                    new LaunchTemplateIamInstanceProfileSpecificationRequest()
+                    .withArn(configuration.getInstanceProfile());
+            launchTemplateData.setIamInstanceProfile(iamInstanceProfile);
+        }
         CreateLaunchTemplateRequest request = new CreateLaunchTemplateRequest()
                 .withLaunchTemplateName(launchTemplateName)
                 .withLaunchTemplateData(launchTemplateData);

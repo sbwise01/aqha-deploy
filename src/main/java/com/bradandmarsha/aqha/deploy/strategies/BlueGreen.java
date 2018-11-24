@@ -1,6 +1,7 @@
 package com.bradandmarsha.aqha.deploy.strategies;
 
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
+import java.io.IOException;
 
 /**
  *
@@ -13,7 +14,7 @@ public class BlueGreen extends DeploymentStrategy {
     }
 
     @Override
-    public void deploy() {
+    public void deploy() throws IOException {
         System.out.println("Executing BlueGreen replacement of application " + this.getOldApplication().getApplicationFullName() +
                 " with application " + this.getNewApplication().getApplicationFullName());
         this.getNewApplication().create();

@@ -1,5 +1,6 @@
 package com.bradandmarsha.aqha.deploy;
 
+import com.bradandmarsha.aqha.deploy.resources.aqhaChefSoloBootstrap;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +26,8 @@ public class aqhaConfiguration {
     private final Integer desiredCapacity;
     private final List<String> subnetIds;
     private final List<String> securityGroupIds;
+    private final aqhaChefSoloBootstrap chefSoloBootstrap;
+    private final String instanceProfile;
     
     @JsonCreator
     public aqhaConfiguration(@JsonProperty("applicationName") String applicationName,
@@ -37,7 +40,9 @@ public class aqhaConfiguration {
             @JsonProperty("minSize") Integer minSize,
             @JsonProperty("desiredCapacity") Integer desiredCapacity,
             @JsonProperty("subnetIds") List<String> subnetIds,
-            @JsonProperty("securityGroupIds") List<String> securityGroupIds) {
+            @JsonProperty("securityGroupIds") List<String> securityGroupIds,
+            @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
+            @JsonProperty("instanceProfile") String instanceProfile) {
         this.applicationName = applicationName;
         this.stackName = stackName;
         this.region = region;
@@ -49,6 +54,8 @@ public class aqhaConfiguration {
         this.desiredCapacity = desiredCapacity;
         this.subnetIds = subnetIds;
         this.securityGroupIds = securityGroupIds;
+        this.chefSoloBootstrap = chefSoloBootstrap;
+        this.instanceProfile = instanceProfile;
     }
     
     @Override
@@ -137,5 +144,19 @@ public class aqhaConfiguration {
      */
     public List<String> getSecurityGroupIds() {
         return securityGroupIds;
+    }
+
+    /**
+     * @return the chefSoloBootstrap
+     */
+    public aqhaChefSoloBootstrap getChefSoloBootstrap() {
+        return chefSoloBootstrap;
+    }
+
+    /**
+     * @return the instanceProfile
+     */
+    public String getInstanceProfile() {
+        return instanceProfile;
     }
 }

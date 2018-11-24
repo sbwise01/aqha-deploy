@@ -2,6 +2,7 @@ package com.bradandmarsha.aqha.deploy.resources;
 
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
 import com.bradandmarsha.aqha.deploy.utils.MD5;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class aqhaApplication {
                 "\n     AutoScalingGroup = " + autoScalingGroup.toString();
     }
     
-    public void create() {
+    public void create() throws IOException {
         //Create LaunchTemplate
         launchTemplate = aqhaLaunchTemplate.createNewLaunchTemplate(configuration,
                 getApplicationFullName());
