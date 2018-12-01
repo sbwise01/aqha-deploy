@@ -28,6 +28,8 @@ public class aqhaConfiguration {
     private final List<String> securityGroupIds;
     private final aqhaChefSoloBootstrap chefSoloBootstrap;
     private final String instanceProfile;
+    private final List<String> targetGroupARNs;
+    private final List<String> elbClassicNames;
     
     @JsonCreator
     public aqhaConfiguration(@JsonProperty("applicationName") String applicationName,
@@ -42,7 +44,9 @@ public class aqhaConfiguration {
             @JsonProperty("subnetIds") List<String> subnetIds,
             @JsonProperty("securityGroupIds") List<String> securityGroupIds,
             @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
-            @JsonProperty("instanceProfile") String instanceProfile) {
+            @JsonProperty("instanceProfile") String instanceProfile,
+            @JsonProperty("targetGroupARNs") List<String> targetGroupARNs,
+            @JsonProperty("elbClassicNames") List<String> elbClassicNames) {
         this.applicationName = applicationName;
         this.stackName = stackName;
         this.region = region;
@@ -56,6 +60,8 @@ public class aqhaConfiguration {
         this.securityGroupIds = securityGroupIds;
         this.chefSoloBootstrap = chefSoloBootstrap;
         this.instanceProfile = instanceProfile;
+        this.targetGroupARNs = targetGroupARNs;
+        this.elbClassicNames = elbClassicNames;
     }
     
     @Override
@@ -67,6 +73,10 @@ public class aqhaConfiguration {
             //Since object was mapped in, this should not occur
             return "";
         }
+    }
+
+    public Boolean hasLoadBalancers() {
+        return this.targetGroupARNs != null || this.elbClassicNames != null;
     }
 
     /**
@@ -158,5 +168,19 @@ public class aqhaConfiguration {
      */
     public String getInstanceProfile() {
         return instanceProfile;
+    }
+
+    /**
+     * @return the targetGroupARNs
+     */
+    public List<String> getTargetGroupARNs() {
+        return targetGroupARNs;
+    }
+
+    /**
+     * @return the elbClassicNames
+     */
+    public List<String> getElbClassicNames() {
+        return elbClassicNames;
     }
 }

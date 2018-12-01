@@ -16,6 +16,7 @@ public class Destroy extends DeploymentStrategy {
     @Override
     public void deploy() throws IOException {
         System.out.println("Destroying application " + this.getOldApplication().getApplicationFullName());
+        this.getOldApplication().detachLoadBalancers();
         this.getOldApplication().destroy();
     }
 }

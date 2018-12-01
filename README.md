@@ -6,8 +6,7 @@ Application deployment utility to perform highly available blue green deployment
   1. ~~Launch Template~~
   1. ~~Autoscaling Group~~
 1. ~~Injectible security groups for instances~~
-1. Self join ELB Classic / ALB
-1. Injectible Health check / Availability check
+1. ~~Self join ELB Classic / ALB~~
 1. Deployment strategies
    1. ~~Initial~~
    1. ~~Destroy~~
@@ -17,6 +16,7 @@ Application deployment utility to perform highly available blue green deployment
 1. True HA for Blue Green
    1. Tests of health check succeed prior to swapping out ASGs in load balancers
    1. Full connection drain wait
+1. Injectible Health check / Availability check
 1. ~~Injectible user data~~
    1.  ~~Support for chef-solo instance bootstraping including S3 config data object creation~~
 1. ~~Cookbook for chef-solo instance bootstrap utility~~

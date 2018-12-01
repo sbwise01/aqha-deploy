@@ -1,10 +1,14 @@
 package com.bradandmarsha.aqha.deploy.resources;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.AttachLoadBalancerTargetGroupsRequest;
+import com.amazonaws.services.autoscaling.model.AttachLoadBalancersRequest;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.CreateAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.DeleteAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DetachLoadBalancerTargetGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DetachLoadBalancersRequest;
 import com.amazonaws.services.autoscaling.model.LaunchTemplateSpecification;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
@@ -21,6 +25,42 @@ public class aqhaAutoScalingGroup {
     
     public aqhaAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
         this.autoScalingGroup = autoScalingGroup;
+    }
+
+    public void attachLoadBalancers(aqhaConfiguration configuration) {
+        AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
+
+        if (configuration.getTargetGroupARNs() != null) {
+            AttachLoadBalancerTargetGroupsRequest request = new AttachLoadBalancerTargetGroupsRequest()
+                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                    .withTargetGroupARNs(configuration.getTargetGroupARNs());
+            client.attachLoadBalancerTargetGroups(request);
+        }
+
+        if (configuration.getElbClassicNames() != null) {
+            AttachLoadBalancersRequest request = new AttachLoadBalancersRequest()
+                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                    .withLoadBalancerNames(configuration.getElbClassicNames());
+            client.attachLoadBalancers(request);
+        }
+    }
+
+    public void detachLoadBalancers(aqhaConfiguration configuration) {
+        AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
+
+        if (configuration.getTargetGroupARNs() != null) {
+            DetachLoadBalancerTargetGroupsRequest request = new DetachLoadBalancerTargetGroupsRequest()
+                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                    .withTargetGroupARNs(configuration.getTargetGroupARNs());
+            client.detachLoadBalancerTargetGroups(request);
+        }
+
+        if (configuration.getElbClassicNames() != null) {
+            DetachLoadBalancersRequest request = new DetachLoadBalancersRequest()
+                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                    .withLoadBalancerNames(configuration.getElbClassicNames());
+            client.detachLoadBalancers(request);
+        }
     }
 
     public void destroy(aqhaConfiguration configuration) {

@@ -62,6 +62,18 @@ public class aqhaApplication {
                 getApplicationFullName(), launchTemplate.getLaunchTemplate());
     }
     
+    public void attachLoadBalancers() {
+        if (configuration.hasLoadBalancers()) {
+            autoScalingGroup.attachLoadBalancers(configuration);
+        }
+    }
+
+    public void detachLoadBalancers() {
+        if (configuration.hasLoadBalancers()) {
+            autoScalingGroup.detachLoadBalancers(configuration);
+        }
+    }
+
     public void destroy() {
         //Destroy AutoScalingGroup
         autoScalingGroup.destroy(configuration);

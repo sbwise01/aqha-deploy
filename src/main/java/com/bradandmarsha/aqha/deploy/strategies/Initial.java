@@ -17,5 +17,6 @@ public class Initial extends DeploymentStrategy {
     public void deploy() throws IOException {
         System.out.println("Initial deployment of application " + this.getNewApplication().getApplicationFullName());
         this.getNewApplication().create();
+        this.getNewApplication().attachLoadBalancers();
     }
 }

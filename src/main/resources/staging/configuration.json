@@ -3,7 +3,7 @@
     "stackName": "staging",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-05b2773f6ed3fdc0a",
+    "amiId": "ami-0fbd6494ab4ed9604",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -21,5 +21,8 @@
     ],
     "securityGroupIds": [
         "sg-08ba1c668aa7b453c"
+    ],
+    "elbClassicNames": [
+        "example-web-app-staging"
     ]
 }
