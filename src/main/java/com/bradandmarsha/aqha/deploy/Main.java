@@ -17,7 +17,7 @@ import org.apache.commons.cli.ParseException;
  * @author sbwise01
  */
 public class Main {
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException, ParseException, aqhaDeploymentException {
         //Parse command line arguments
         Options options = new Options();
         options.addRequiredOption("c", "configuration", true, "Path to json file containing application configuration information.");

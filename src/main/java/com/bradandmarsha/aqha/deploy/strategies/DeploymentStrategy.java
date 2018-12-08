@@ -1,6 +1,7 @@
 package com.bradandmarsha.aqha.deploy.strategies;
 
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
+import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ public class DeploymentStrategy {
         this.newApplication = newApplication;
     }
     
-    public void deploy() throws IOException {
+    public void deploy() throws IOException, aqhaDeploymentException {
     }
 
     public static DeploymentStrategy selectDeploymentStrategy(aqhaConfiguration configuration,
@@ -44,5 +45,11 @@ public class DeploymentStrategy {
      */
     public aqhaApplication getNewApplication() {
         return newApplication;
+    }
+
+    public void failDeployment(String message) throws IOException, aqhaDeploymentException {
+        DeploymentStrategy strategy = new Destroy(this.getNewApplication(), null);
+        strategy.deploy();
+        throw new aqhaDeploymentException(message);
     }
 }

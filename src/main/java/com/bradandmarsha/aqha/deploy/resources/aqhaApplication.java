@@ -1,6 +1,7 @@
 package com.bradandmarsha.aqha.deploy.resources;
 
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
+import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.utils.MD5;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,6 +67,23 @@ public class aqhaApplication {
         if (configuration.hasLoadBalancers()) {
             autoScalingGroup.attachLoadBalancers(configuration);
         }
+    }
+
+    public Boolean verifyInstanceHealth() throws aqhaDeploymentException {
+        return autoScalingGroup.verifyInstanceHealth(configuration);
+    }
+
+    public Boolean verifyLoadBalancerHealth() {
+        //TODO:  Load Balancer Health is acheived once all instances show
+        //       in service status in all load balancers
+        return Boolean.TRUE;
+    }
+
+    public Boolean verifyLoadBalancerDrain() {
+        //TODO:  Load Balancer Drain is acheived once all instances
+        //       have fully drained their connections and are no longer
+        //       targets in the load balancer
+        return Boolean.TRUE;
     }
 
     public void detachLoadBalancers() {

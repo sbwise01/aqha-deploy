@@ -30,6 +30,10 @@ public class aqhaConfiguration {
     private final String instanceProfile;
     private final List<String> targetGroupARNs;
     private final List<String> elbClassicNames;
+    private final Integer applicationAvailabilityTimeout;
+    private final Integer applicationAvailabilityWait;
+    private final Integer instanceReservationTimeout;
+    private final Integer instanceReservationWait;
     
     @JsonCreator
     public aqhaConfiguration(@JsonProperty("applicationName") String applicationName,
@@ -46,7 +50,11 @@ public class aqhaConfiguration {
             @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
             @JsonProperty("instanceProfile") String instanceProfile,
             @JsonProperty("targetGroupARNs") List<String> targetGroupARNs,
-            @JsonProperty("elbClassicNames") List<String> elbClassicNames) {
+            @JsonProperty("elbClassicNames") List<String> elbClassicNames,
+            @JsonProperty("applicationAvailabilityTimeout") Integer applicationAvailabilityTimeout,
+            @JsonProperty("applicationAvailabilityWait") Integer applicationAvailabilityWait,
+            @JsonProperty("instanceReservationTimeout") Integer instanceReservationTimeout,
+            @JsonProperty("instanceReservationWait") Integer instanceReservationWait) {
         this.applicationName = applicationName;
         this.stackName = stackName;
         this.region = region;
@@ -62,6 +70,10 @@ public class aqhaConfiguration {
         this.instanceProfile = instanceProfile;
         this.targetGroupARNs = targetGroupARNs;
         this.elbClassicNames = elbClassicNames;
+        this.applicationAvailabilityTimeout = applicationAvailabilityTimeout;
+        this.applicationAvailabilityWait = applicationAvailabilityWait;
+        this.instanceReservationTimeout = instanceReservationTimeout;
+        this.instanceReservationWait = instanceReservationWait;
     }
     
     @Override
@@ -182,5 +194,33 @@ public class aqhaConfiguration {
      */
     public List<String> getElbClassicNames() {
         return elbClassicNames;
+    }
+
+    /**
+     * @return the applicationAvailabilityTimeout
+     */
+    public Integer getApplicationAvailabilityTimeout() {
+        return applicationAvailabilityTimeout;
+    }
+
+    /**
+     * @return the applicationAvailabilityWait
+     */
+    public Integer getApplicationAvailabilityWait() {
+        return applicationAvailabilityWait;
+    }
+
+    /**
+     * @return the instanceReservationTimeout
+     */
+    public Integer getInstanceReservationTimeout() {
+        return instanceReservationTimeout;
+    }
+
+    /**
+     * @return the instanceReservationWait
+     */
+    public Integer getInstanceReservationWait() {
+        return instanceReservationWait;
     }
 }

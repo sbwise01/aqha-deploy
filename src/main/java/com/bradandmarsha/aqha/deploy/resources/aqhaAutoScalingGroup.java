@@ -12,19 +12,24 @@ import com.amazonaws.services.autoscaling.model.DetachLoadBalancersRequest;
 import com.amazonaws.services.autoscaling.model.LaunchTemplateSpecification;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
+import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.utils.Client;
+import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author sbwise01
  */
 public class aqhaAutoScalingGroup {
-    private final AutoScalingGroup autoScalingGroup;
+    private AutoScalingGroup autoScalingGroup;
+    private Boolean loadBalancersAttached;
     
     public aqhaAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
         this.autoScalingGroup = autoScalingGroup;
+        this.loadBalancersAttached = Boolean.FALSE;
     }
 
     public void attachLoadBalancers(aqhaConfiguration configuration) {
@@ -35,6 +40,7 @@ public class aqhaAutoScalingGroup {
                     .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
                     .withTargetGroupARNs(configuration.getTargetGroupARNs());
             client.attachLoadBalancerTargetGroups(request);
+            loadBalancersAttached = Boolean.TRUE;
         }
 
         if (configuration.getElbClassicNames() != null) {
@@ -42,24 +48,27 @@ public class aqhaAutoScalingGroup {
                     .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
                     .withLoadBalancerNames(configuration.getElbClassicNames());
             client.attachLoadBalancers(request);
+            loadBalancersAttached = Boolean.TRUE;
         }
     }
 
     public void detachLoadBalancers(aqhaConfiguration configuration) {
         AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
 
-        if (configuration.getTargetGroupARNs() != null) {
-            DetachLoadBalancerTargetGroupsRequest request = new DetachLoadBalancerTargetGroupsRequest()
-                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
-                    .withTargetGroupARNs(configuration.getTargetGroupARNs());
-            client.detachLoadBalancerTargetGroups(request);
-        }
+        if (loadBalancersAttached) {
+            if (configuration.getTargetGroupARNs() != null) {
+                DetachLoadBalancerTargetGroupsRequest request = new DetachLoadBalancerTargetGroupsRequest()
+                        .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                        .withTargetGroupARNs(configuration.getTargetGroupARNs());
+                client.detachLoadBalancerTargetGroups(request);
+            }
 
-        if (configuration.getElbClassicNames() != null) {
-            DetachLoadBalancersRequest request = new DetachLoadBalancersRequest()
-                    .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
-                    .withLoadBalancerNames(configuration.getElbClassicNames());
-            client.detachLoadBalancers(request);
+            if (configuration.getElbClassicNames() != null) {
+                DetachLoadBalancersRequest request = new DetachLoadBalancersRequest()
+                        .withAutoScalingGroupName(this.autoScalingGroup.getAutoScalingGroupName())
+                        .withLoadBalancerNames(configuration.getElbClassicNames());
+                client.detachLoadBalancers(request);
+            }
         }
     }
 
@@ -72,19 +81,74 @@ public class aqhaAutoScalingGroup {
         client.deleteAutoScalingGroup(request);
     }
     
+    public Boolean verifyInstanceHealth(aqhaConfiguration configuration) throws aqhaDeploymentException {
+        //TODO:  Instance Health is acheived once all instances pass optional
+        //       instance health check and/or startup hook
+        Stopwatch reservationStopwatch = Stopwatch.createStarted();
+        while(autoScalingGroup.getInstances().size() < configuration.getMinSize() &&
+                reservationStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getInstanceReservationTimeout()) {
+            System.out.println("Instance reservations not complete ... wating " +
+                    configuration.getInstanceReservationWait() + " seconds");
+            try {
+                TimeUnit.SECONDS.sleep(configuration.getInstanceReservationWait());
+            } catch (InterruptedException ex) {
+                System.out.println("Instance reservation wait exception " + ex.getMessage());
+            }
+            List<AutoScalingGroup> asgs = retrieveASGs(configuration, autoScalingGroup.getAutoScalingGroupName());
+            if(asgs.size() != 1) {
+                throw new aqhaDeploymentException("Error retrieving autoScalingGroup during instance reservation check");
+            }
+            autoScalingGroup = asgs.get(0);
+        }
+
+        if(reservationStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getInstanceReservationTimeout()) {
+            System.out.println("Instance reservations did not complete before timeout " +
+                    configuration.getInstanceReservationTimeout());
+            return Boolean.FALSE;
+        }
+
+        System.out.println("Instance reservations completed in " +
+                reservationStopwatch.elapsed(TimeUnit.SECONDS) + " seconds");
+
+        List<aqhaEC2Instance> instances = aqhaEC2Instance.getInstances(configuration, getInstanceIds(configuration));
+        Integer healthyInstances = 0;
+        for(aqhaEC2Instance instance : instances) {
+            if(instance.isHealthy()) {
+                healthyInstances++;
+            }
+        }
+
+        return healthyInstances >= configuration.getMinSize();
+    }
+
+    private List<String> getInstanceIds(aqhaConfiguration configuration) {
+        List<String> instanceIds = new ArrayList<>();
+        autoScalingGroup
+                .getInstances()
+                .forEach((instance) -> {
+            instanceIds.add(instance.getInstanceId());
+        });
+        return instanceIds;
+    }
+
     public static List<aqhaAutoScalingGroup> retrieveAutoScalingGroups(aqhaConfiguration configuration,
             String applicationFullName) {
         List<aqhaAutoScalingGroup> autoScalingGroups = new ArrayList<>();
-        AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
-        DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest()
-                .withAutoScalingGroupNames(applicationFullName);
-        client.describeAutoScalingGroups(request).getAutoScalingGroups()
+        retrieveASGs(configuration, applicationFullName)
                 .forEach((asg) -> {
             autoScalingGroups.add(new aqhaAutoScalingGroup(asg));
         });
         return autoScalingGroups;
     }
     
+    private static List<AutoScalingGroup> retrieveASGs(aqhaConfiguration configuration,
+            String applicationFullName) {
+        AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
+        DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest()
+                .withAutoScalingGroupNames(applicationFullName);
+        return client.describeAutoScalingGroups(request).getAutoScalingGroups();
+    }
+
     public static aqhaAutoScalingGroup createNewAutoScalingGroup(aqhaConfiguration configuration,
             String autoScalingGroupName, LaunchTemplate launchTemplate) {
         AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
