@@ -4,6 +4,7 @@ import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -29,7 +30,11 @@ public class BlueGreen extends DeploymentStrategy {
             this.getNewApplication().attachLoadBalancers();
 
             //Check for load balancer health before destroying old application
-            if (!this.getNewApplication().verifyLoadBalancerHealth()) {
+            if (this.getNewApplication().verifyLoadBalancerHealth(applicationAvailabilityStopwatch)) {
+                System.out.println("All load balancers became healthy in " +
+                        applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                        " seconds");
+            } else {
                 failDeployment("New application " + this.getNewApplication().getApplicationFullName() +
                         " did not become healthy  ... removing new application");
             }

@@ -1,7 +1,15 @@
 package com.bradandmarsha.aqha.deploy.resources;
 
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthRequest;
+import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthResult;
+import com.amazonaws.services.elasticloadbalancing.model.InstanceState;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
 import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
+import com.bradandmarsha.aqha.deploy.utils.Client;
 import com.bradandmarsha.aqha.deploy.utils.MD5;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -86,9 +94,94 @@ public class aqhaApplication {
         return autoScalingGroup.verifyInstanceHealth(applicationAvailabilityStopwatch, configuration);
     }
 
-    public Boolean verifyLoadBalancerHealth() {
-        //TODO:  Load Balancer Health is acheived once all instances show
-        //       in service status in all load balancers
+    public Boolean verifyLoadBalancerHealth(Stopwatch applicationAvailabilityStopwatch) {
+        if (configuration.hasLoadBalancers()) {
+            System.out.println("Verifying load balancer health");
+            List<String> instanceIds = autoScalingGroup.getInstanceIds(configuration);
+            if (configuration.getTargetGroupARNs() != null) {
+                com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient
+                        client = Client.getElbV2Client(configuration.getRegion());
+                Integer healthyTargetGroups = 0;
+                while(healthyTargetGroups < configuration.getTargetGroupARNs().size() &&
+                        applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
+                    System.out.println("Healthy target groups " + healthyTargetGroups +
+                            " is less than number of target groups " +
+                            configuration.getTargetGroupARNs().size() + " ... waiting " +
+                            configuration.getApplicationAvailabilityWait() +
+                            " seconds ... elapsed time is " + applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                            " seconds");
+                    try {
+                        TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
+                    } catch (InterruptedException ex) {
+                        System.out.println("Application availability wait exception " + ex.getMessage());
+                    }
+                    healthyTargetGroups = 0;
+                    for(String tgArn : configuration.getTargetGroupARNs()) {
+                        Integer healthyInstances = 0;
+                        DescribeTargetHealthResult describeTargetHealthResult =
+                                client.describeTargetHealth(new DescribeTargetHealthRequest()
+                                        .withTargetGroupArn(tgArn));
+                        for(TargetHealthDescription tghDesc : describeTargetHealthResult.getTargetHealthDescriptions()) {
+                            if(instanceIds.contains(tghDesc.getTarget().getId()) &&
+                                    tghDesc.getTargetHealth().getState().equalsIgnoreCase("healthy")) {
+                                healthyInstances++;
+                            }
+                        }
+                        if(healthyInstances.equals(instanceIds.size())) {
+                            healthyTargetGroups++;
+                        }
+                    }
+                }
+
+                if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
+                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                            " did not become avaialble before timeout " +
+                            configuration.getApplicationAvailabilityTimeout());
+                    return Boolean.FALSE;
+                }
+            }
+            if (configuration.getElbClassicNames() != null) {
+                AmazonElasticLoadBalancingClient client = Client.getElbV1Client(configuration.getRegion());
+                Integer healthyElbs = 0;
+                while(healthyElbs < configuration.getElbClassicNames().size() &&
+                        applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
+                    System.out.println("Healthy ELB classics " + healthyElbs +
+                            " is less than number of ELBs " +
+                            configuration.getElbClassicNames().size() + " ... waiting " +
+                            configuration.getApplicationAvailabilityWait() +
+                            " seconds ... elapsed time is " + applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                            " seconds");
+                    try {
+                        TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
+                    } catch (InterruptedException ex) {
+                        System.out.println("Application availability wait exception " + ex.getMessage());
+                    }
+                    healthyElbs = 0;
+                    for(String elbName : configuration.getElbClassicNames()) {
+                        Integer healthyInstances = 0;
+                        DescribeInstanceHealthResult describeInstanceHealthResult =
+                                client.describeInstanceHealth(new DescribeInstanceHealthRequest()
+                                        .withLoadBalancerName(elbName));
+                        for(InstanceState iState : describeInstanceHealthResult.getInstanceStates()) {
+                            if(instanceIds.contains(iState.getInstanceId()) &&
+                                    iState.getState().equalsIgnoreCase("InService")) {
+                                healthyInstances++;
+                            }
+                        }
+                        if(healthyInstances.equals(instanceIds.size())) {
+                            healthyElbs++;
+                        }
+                    }
+                }
+
+                if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
+                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                            " did not become avaialble before timeout " +
+                            configuration.getApplicationAvailabilityTimeout());
+                    return Boolean.FALSE;
+                }
+            }
+        }
         return Boolean.TRUE;
     }
 

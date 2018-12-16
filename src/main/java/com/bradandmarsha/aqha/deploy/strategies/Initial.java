@@ -4,6 +4,7 @@ import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -27,7 +28,11 @@ public class Initial extends DeploymentStrategy {
             ////Attach load balancers
             this.getNewApplication().attachLoadBalancers();
 
-            if (!this.getNewApplication().verifyLoadBalancerHealth()) {
+            if (this.getNewApplication().verifyLoadBalancerHealth(applicationAvailabilityStopwatch)) {
+                System.out.println("All load balancers became healthy in " +
+                        applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                        " seconds");
+            } else {
                 System.out.println("Initial application " + this.getNewApplication().getApplicationFullName() +
                         " did not become healthy  ... letting it remain running");
             }

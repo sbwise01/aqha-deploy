@@ -85,6 +85,7 @@ public class aqhaAutoScalingGroup {
             aqhaConfiguration configuration) throws aqhaDeploymentException {
         //TODO:  Instance Health is acheived once all instances pass optional
         //       instance health check and/or startup hook
+        System.out.println("Verifying instance health");
         Stopwatch reservationStopwatch = Stopwatch.createStarted();
         while(autoScalingGroup.getInstances().size() < configuration.getMinSize() &&
                 reservationStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getInstanceReservationTimeout()) {
@@ -144,7 +145,7 @@ public class aqhaAutoScalingGroup {
         return healthyInstances >= configuration.getMinSize();
     }
 
-    private List<String> getInstanceIds(aqhaConfiguration configuration) {
+    public List<String> getInstanceIds(aqhaConfiguration configuration) {
         List<String> instanceIds = new ArrayList<>();
         autoScalingGroup
                 .getInstances()
