@@ -3,7 +3,7 @@
     "stackName": "production",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0c6f4877fae843633",
+    "amiId": "ami-0cd4c6862a051af49",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -13,6 +13,12 @@
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
     "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
+    "aqhaInstanceHealthCheck": {
+        "protocol": "http",
+        "port": 80,
+        "path": "/meta/health",
+        "usePublicAddress": true
+    },
     "aqhaChefSoloBootstrap": {
         "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/production/chef",
         "bucket": "brad-chef-bootstrap",
@@ -27,6 +33,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-default/2e488e02fd830c11"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/59fb03de901d7751"
     ]
 }

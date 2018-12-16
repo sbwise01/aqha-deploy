@@ -1,6 +1,7 @@
 package com.bradandmarsha.aqha.deploy;
 
 import com.bradandmarsha.aqha.deploy.resources.aqhaChefSoloBootstrap;
+import com.bradandmarsha.aqha.deploy.resources.aqhaInstanceHealthCheck;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,7 @@ public class aqhaConfiguration {
     private final Integer applicationAvailabilityWait;
     private final Integer instanceReservationTimeout;
     private final Integer instanceReservationWait;
+    private final aqhaInstanceHealthCheck instanceHealthCheck;
     
     @JsonCreator
     public aqhaConfiguration(@JsonProperty("applicationName") String applicationName,
@@ -54,7 +56,8 @@ public class aqhaConfiguration {
             @JsonProperty("applicationAvailabilityTimeout") Integer applicationAvailabilityTimeout,
             @JsonProperty("applicationAvailabilityWait") Integer applicationAvailabilityWait,
             @JsonProperty("instanceReservationTimeout") Integer instanceReservationTimeout,
-            @JsonProperty("instanceReservationWait") Integer instanceReservationWait) {
+            @JsonProperty("instanceReservationWait") Integer instanceReservationWait,
+            @JsonProperty("aqhaInstanceHealthCheck") aqhaInstanceHealthCheck instanceHealthCheck) {
         this.applicationName = applicationName;
         this.stackName = stackName;
         this.region = region;
@@ -74,6 +77,7 @@ public class aqhaConfiguration {
         this.applicationAvailabilityWait = applicationAvailabilityWait;
         this.instanceReservationTimeout = instanceReservationTimeout;
         this.instanceReservationWait = instanceReservationWait;
+        this.instanceHealthCheck = instanceHealthCheck;
     }
     
     @Override
@@ -222,5 +226,12 @@ public class aqhaConfiguration {
      */
     public Integer getInstanceReservationWait() {
         return instanceReservationWait;
+    }
+
+    /**
+     * @return the instanceHealthCheck
+     */
+    public aqhaInstanceHealthCheck getInstanceHealthCheck() {
+        return instanceHealthCheck;
     }
 }

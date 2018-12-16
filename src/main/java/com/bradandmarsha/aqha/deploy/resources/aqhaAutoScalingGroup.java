@@ -81,14 +81,17 @@ public class aqhaAutoScalingGroup {
         client.deleteAutoScalingGroup(request);
     }
     
-    public Boolean verifyInstanceHealth(aqhaConfiguration configuration) throws aqhaDeploymentException {
+    public Boolean verifyInstanceHealth(Stopwatch applicationAvailabilityStopwatch,
+            aqhaConfiguration configuration) throws aqhaDeploymentException {
         //TODO:  Instance Health is acheived once all instances pass optional
         //       instance health check and/or startup hook
         Stopwatch reservationStopwatch = Stopwatch.createStarted();
         while(autoScalingGroup.getInstances().size() < configuration.getMinSize() &&
                 reservationStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getInstanceReservationTimeout()) {
             System.out.println("Instance reservations not complete ... wating " +
-                    configuration.getInstanceReservationWait() + " seconds");
+                    configuration.getInstanceReservationWait() + " seconds ... elapsed time is " +
+                    applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                    " seconds");
             try {
                 TimeUnit.SECONDS.sleep(configuration.getInstanceReservationWait());
             } catch (InterruptedException ex) {
@@ -112,10 +115,30 @@ public class aqhaAutoScalingGroup {
 
         List<aqhaEC2Instance> instances = aqhaEC2Instance.getInstances(configuration, getInstanceIds(configuration));
         Integer healthyInstances = 0;
-        for(aqhaEC2Instance instance : instances) {
-            if(instance.isHealthy()) {
-                healthyInstances++;
+        while(healthyInstances < configuration.getMinSize() &&
+                applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
+            System.out.println("Healthy instances " + healthyInstances + " is less than minimum size " +
+                    configuration.getMinSize() + " ... waiting " + configuration.getApplicationAvailabilityWait() +
+                    " seconds ... elapsed time is " + applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                    " seconds");
+            try {
+                TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
+            } catch (InterruptedException ex) {
+                System.out.println("Application availability wait exception " + ex.getMessage());
             }
+            healthyInstances = 0;
+            for(aqhaEC2Instance instance : instances) {
+                if(instance.isHealthy(configuration)) {
+                    healthyInstances++;
+                }
+            }
+        }
+
+        if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
+            System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                    " did not become avaialble before timeout " +
+                    configuration.getApplicationAvailabilityTimeout());
+            return Boolean.FALSE;
         }
 
         return healthyInstances >= configuration.getMinSize();

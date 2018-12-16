@@ -3,9 +3,11 @@ package com.bradandmarsha.aqha.deploy.resources;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
 import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.utils.MD5;
+import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -54,7 +56,7 @@ public class aqhaApplication {
                 "\n     AutoScalingGroup = " + autoScalingGroup.toString();
     }
     
-    public void create() throws IOException, aqhaDeploymentException {
+    public void create(Stopwatch applicationAvailabilityStopwatch) throws IOException, aqhaDeploymentException {
         //Create LaunchTemplate
         launchTemplate = aqhaLaunchTemplate.createNewLaunchTemplate(configuration,
                 getApplicationFullName());
@@ -64,7 +66,11 @@ public class aqhaApplication {
                 getApplicationFullName(), launchTemplate.getLaunchTemplate());
 
         //Verify instance health
-        if(!verifyInstanceHealth()) {
+        if(verifyInstanceHealth(applicationAvailabilityStopwatch)) {
+            System.out.println("All instances became healthy in " +
+                    applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
+                    " seconds");
+        } else {
             throw new aqhaDeploymentException("New application " + getApplicationFullName() +
                         " did not become healthy  ... removing new application");
         }
@@ -76,8 +82,8 @@ public class aqhaApplication {
         }
     }
 
-    public Boolean verifyInstanceHealth() throws aqhaDeploymentException {
-        return autoScalingGroup.verifyInstanceHealth(configuration);
+    public Boolean verifyInstanceHealth(Stopwatch applicationAvailabilityStopwatch) throws aqhaDeploymentException {
+        return autoScalingGroup.verifyInstanceHealth(applicationAvailabilityStopwatch, configuration);
     }
 
     public Boolean verifyLoadBalancerHealth() {

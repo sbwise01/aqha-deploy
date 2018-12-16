@@ -13,6 +13,12 @@
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
     "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
+    "aqhaInstanceHealthCheck": {
+        "protocol": "http",
+        "port": 80,
+        "path": "/meta/health",
+        "usePublicAddress": true
+    },
     "aqhaChefSoloBootstrap": {
         "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/staging/chef",
         "bucket": "brad-chef-bootstrap",

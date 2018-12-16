@@ -2,6 +2,7 @@ package com.bradandmarsha.aqha.deploy.strategies;
 
 import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
+import com.google.common.base.Stopwatch;
 import java.io.IOException;
 
 /**
@@ -20,7 +21,8 @@ public class Initial extends DeploymentStrategy {
 
         try {
             //Create new application
-            this.getNewApplication().create();
+            Stopwatch applicationAvailabilityStopwatch = Stopwatch.createStarted();
+            this.getNewApplication().create(applicationAvailabilityStopwatch);
 
             ////Attach load balancers
             this.getNewApplication().attachLoadBalancers();
