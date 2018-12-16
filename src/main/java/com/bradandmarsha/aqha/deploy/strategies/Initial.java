@@ -15,24 +15,28 @@ public class Initial extends DeploymentStrategy {
     }
 
     @Override
-    public void deploy() throws IOException, aqhaDeploymentException {
+    public void deploy() throws aqhaDeploymentException {
         System.out.println("Initial deployment of application " + this.getNewApplication().getApplicationFullName());
 
-        //Create new application
-        this.getNewApplication().create();
+        try {
+            //Create new application
+            this.getNewApplication().create();
 
-        //TODO:  perhaps instance health check can be folded into create() method
-        //Check for instance health before attaching load balancers
-        if (!this.getNewApplication().verifyInstanceHealth()) {
-            failDeployment("Initial application " + this.getNewApplication().getApplicationFullName() +
-                    " did not become healthy  ... removing initial application");
-        }
+            //TODO:  perhaps instance health check can be folded into create() method
+            //Check for instance health before attaching load balancers
+            if (!this.getNewApplication().verifyInstanceHealth()) {
+                failDeployment("Initial application " + this.getNewApplication().getApplicationFullName() +
+                        " did not become healthy  ... removing initial application");
+            }
 
-        ////Attach load balancers
-        this.getNewApplication().attachLoadBalancers();
-        if (!this.getNewApplication().verifyLoadBalancerHealth()) {
-            System.out.println("Initial application " + this.getNewApplication().getApplicationFullName() +
-                    " did not become healthy  ... letting it remain running");
+            ////Attach load balancers
+            this.getNewApplication().attachLoadBalancers();
+            if (!this.getNewApplication().verifyLoadBalancerHealth()) {
+                System.out.println("Initial application " + this.getNewApplication().getApplicationFullName() +
+                        " did not become healthy  ... letting it remain running");
+            }
+        } catch(IOException e) {
+            failDeployment(e);
         }
     }
 }
