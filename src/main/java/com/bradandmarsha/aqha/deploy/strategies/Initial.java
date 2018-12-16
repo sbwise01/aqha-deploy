@@ -22,20 +22,14 @@ public class Initial extends DeploymentStrategy {
             //Create new application
             this.getNewApplication().create();
 
-            //TODO:  perhaps instance health check can be folded into create() method
-            //Check for instance health before attaching load balancers
-            if (!this.getNewApplication().verifyInstanceHealth()) {
-                failDeployment("Initial application " + this.getNewApplication().getApplicationFullName() +
-                        " did not become healthy  ... removing initial application");
-            }
-
             ////Attach load balancers
             this.getNewApplication().attachLoadBalancers();
+
             if (!this.getNewApplication().verifyLoadBalancerHealth()) {
                 System.out.println("Initial application " + this.getNewApplication().getApplicationFullName() +
                         " did not become healthy  ... letting it remain running");
             }
-        } catch(IOException e) {
+        } catch(aqhaDeploymentException | IOException e) {
             failDeployment(e);
         }
     }

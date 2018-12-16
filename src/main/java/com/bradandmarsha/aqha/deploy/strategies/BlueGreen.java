@@ -23,13 +23,6 @@ public class BlueGreen extends DeploymentStrategy {
             //Create new application
             this.getNewApplication().create();
 
-            //TODO:  perhaps instance health check can be folded into create() method
-            //Check for instance health before attaching load balancers
-            if (!this.getNewApplication().verifyInstanceHealth()) {
-                failDeployment("New application " + this.getNewApplication().getApplicationFullName() +
-                        " did not become healthy  ... removing new application");
-            }
-
             //Attach load balancers
             this.getNewApplication().attachLoadBalancers();
 
@@ -38,7 +31,7 @@ public class BlueGreen extends DeploymentStrategy {
                 failDeployment("New application " + this.getNewApplication().getApplicationFullName() +
                         " did not become healthy  ... removing new application");
             }
-        } catch(IOException e) {
+        } catch(aqhaDeploymentException | IOException e) {
             failDeployment(e);
         }
 

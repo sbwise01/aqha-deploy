@@ -54,13 +54,20 @@ public class aqhaApplication {
                 "\n     AutoScalingGroup = " + autoScalingGroup.toString();
     }
     
-    public void create() throws IOException {
+    public void create() throws IOException, aqhaDeploymentException {
         //Create LaunchTemplate
         launchTemplate = aqhaLaunchTemplate.createNewLaunchTemplate(configuration,
                 getApplicationFullName());
+
         //Create AutoScalingGroup
         autoScalingGroup = aqhaAutoScalingGroup.createNewAutoScalingGroup(configuration,
                 getApplicationFullName(), launchTemplate.getLaunchTemplate());
+
+        //Verify instance health
+        if(!verifyInstanceHealth()) {
+            throw new aqhaDeploymentException("New application " + getApplicationFullName() +
+                        " did not become healthy  ... removing new application");
+        }
     }
     
     public void attachLoadBalancers() {
