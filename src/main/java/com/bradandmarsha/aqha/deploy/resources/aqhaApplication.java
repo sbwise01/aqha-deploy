@@ -185,10 +185,92 @@ public class aqhaApplication {
         return Boolean.TRUE;
     }
 
-    public Boolean verifyLoadBalancerDrain() {
-        //TODO:  Load Balancer Drain is acheived once all instances
-        //       have fully drained their connections and are no longer
-        //       targets in the load balancer
+    public Boolean verifyLoadBalancerDrain(Stopwatch applicationDestructionStopwatch) {
+        if (configuration.hasLoadBalancers()) {
+            System.out.println("Verifying load balancer drain");
+            List<String> instanceIds = autoScalingGroup.getInstanceIds(configuration);
+            if (configuration.getTargetGroupARNs() != null) {
+                com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient
+                        client = Client.getElbV2Client(configuration.getRegion());
+                Integer drainedTargetGroups = 0;
+                while(drainedTargetGroups < configuration.getTargetGroupARNs().size() &&
+                        applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
+                    System.out.println("Drained target groups " + drainedTargetGroups +
+                            " is less than number of target groups " +
+                            configuration.getTargetGroupARNs().size() + " ... waiting " +
+                            configuration.getApplicationDestructionWait() +
+                            " seconds ... elapsed time is " + applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) +
+                            " seconds");
+                    try {
+                        TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
+                    } catch (InterruptedException ex) {
+                        System.out.println("Application destruction wait exception " + ex.getMessage());
+                    }
+                    drainedTargetGroups = 0;
+                    for(String tgArn : configuration.getTargetGroupARNs()) {
+                        Integer attachedInstances = 0;
+                        DescribeTargetHealthResult describeTargetHealthResult =
+                                client.describeTargetHealth(new DescribeTargetHealthRequest()
+                                        .withTargetGroupArn(tgArn));
+                        for(TargetHealthDescription tghDesc : describeTargetHealthResult.getTargetHealthDescriptions()) {
+                            if(instanceIds.contains(tghDesc.getTarget().getId())) {
+                                attachedInstances++;
+                            }
+                        }
+                        if(attachedInstances.equals(0)) {
+                            drainedTargetGroups++;
+                        }
+                    }
+                }
+
+                if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
+                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                            " did not drain before timeout " +
+                            configuration.getApplicationDestructionTimeout());
+                    return Boolean.FALSE;
+                }
+            }
+            if (configuration.getElbClassicNames() != null) {
+                AmazonElasticLoadBalancingClient client = Client.getElbV1Client(configuration.getRegion());
+                Integer drainedElbs = 0;
+                while(drainedElbs < configuration.getElbClassicNames().size() &&
+                        applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
+                    System.out.println("Drained ELB classics " + drainedElbs +
+                            " is less than number of ELBs " +
+                            configuration.getElbClassicNames().size() + " ... waiting " +
+                            configuration.getApplicationDestructionWait() +
+                            " seconds ... elapsed time is " + applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) +
+                            " seconds");
+                    try {
+                        TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
+                    } catch (InterruptedException ex) {
+                        System.out.println("Application destruction wait exception " + ex.getMessage());
+                    }
+                    drainedElbs = 0;
+                    for(String elbName : configuration.getElbClassicNames()) {
+                        Integer attachedInstances = 0;
+                        DescribeInstanceHealthResult describeInstanceHealthResult =
+                                client.describeInstanceHealth(new DescribeInstanceHealthRequest()
+                                        .withLoadBalancerName(elbName));
+                        for(InstanceState iState : describeInstanceHealthResult.getInstanceStates()) {
+                            if(instanceIds.contains(iState.getInstanceId())) {
+                                attachedInstances++;
+                            }
+                        }
+                        if(attachedInstances.equals(0)) {
+                            drainedElbs++;
+                        }
+                    }
+                }
+
+                if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
+                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                            " did not drain before timeout " +
+                            configuration.getApplicationAvailabilityTimeout());
+                    return Boolean.FALSE;
+                }
+            }
+        }
         return Boolean.TRUE;
     }
 

@@ -3,13 +3,16 @@
     "stackName": "staging",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0c6f4877fae843633",
+    "amiId": "ami-0f157902c59e79261",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
     "desiredCapacity": 1,
+    "asgHealthCheckGracePeriod": 300,
     "applicationAvailabilityTimeout": 300,
     "applicationAvailabilityWait": 10,
+    "applicationDestructionTimeout": 600,
+    "applicationDestructionWait": 10,
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
     "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
@@ -33,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "elbClassicNames": [
-        "example-web-app-staging"
+        "example-web-app-elb"
     ]
 }

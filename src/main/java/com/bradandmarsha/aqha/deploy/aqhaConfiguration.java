@@ -25,6 +25,7 @@ public class aqhaConfiguration {
     private final Integer maxSize;
     private final Integer minSize;
     private final Integer desiredCapacity;
+    private final Integer asgHealthCheckGracePeriod;
     private final List<String> subnetIds;
     private final List<String> securityGroupIds;
     private final aqhaChefSoloBootstrap chefSoloBootstrap;
@@ -33,6 +34,8 @@ public class aqhaConfiguration {
     private final List<String> elbClassicNames;
     private final Integer applicationAvailabilityTimeout;
     private final Integer applicationAvailabilityWait;
+    private final Integer applicationDestructionTimeout;
+    private final Integer applicationDestructionWait;
     private final Integer instanceReservationTimeout;
     private final Integer instanceReservationWait;
     private final aqhaInstanceHealthCheck instanceHealthCheck;
@@ -47,6 +50,7 @@ public class aqhaConfiguration {
             @JsonProperty("maxSize") Integer maxSize,
             @JsonProperty("minSize") Integer minSize,
             @JsonProperty("desiredCapacity") Integer desiredCapacity,
+            @JsonProperty("asgHealthCheckGracePeriod") Integer asgHealthCheckGracePeriod,
             @JsonProperty("subnetIds") List<String> subnetIds,
             @JsonProperty("securityGroupIds") List<String> securityGroupIds,
             @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
@@ -55,6 +59,8 @@ public class aqhaConfiguration {
             @JsonProperty("elbClassicNames") List<String> elbClassicNames,
             @JsonProperty("applicationAvailabilityTimeout") Integer applicationAvailabilityTimeout,
             @JsonProperty("applicationAvailabilityWait") Integer applicationAvailabilityWait,
+            @JsonProperty("applicationDestructionTimeout") Integer applicationDestructionTimeout,
+            @JsonProperty("applicationDestructionWait") Integer applicationDestructionWait,
             @JsonProperty("instanceReservationTimeout") Integer instanceReservationTimeout,
             @JsonProperty("instanceReservationWait") Integer instanceReservationWait,
             @JsonProperty("aqhaInstanceHealthCheck") aqhaInstanceHealthCheck instanceHealthCheck) {
@@ -67,6 +73,7 @@ public class aqhaConfiguration {
         this.maxSize = maxSize;
         this.minSize = minSize;
         this.desiredCapacity = desiredCapacity;
+        this.asgHealthCheckGracePeriod = asgHealthCheckGracePeriod;
         this.subnetIds = subnetIds;
         this.securityGroupIds = securityGroupIds;
         this.chefSoloBootstrap = chefSoloBootstrap;
@@ -75,6 +82,8 @@ public class aqhaConfiguration {
         this.elbClassicNames = elbClassicNames;
         this.applicationAvailabilityTimeout = applicationAvailabilityTimeout;
         this.applicationAvailabilityWait = applicationAvailabilityWait;
+        this.applicationDestructionTimeout = applicationDestructionTimeout;
+        this.applicationDestructionWait = applicationDestructionWait;
         this.instanceReservationTimeout = instanceReservationTimeout;
         this.instanceReservationWait = instanceReservationWait;
         this.instanceHealthCheck = instanceHealthCheck;
@@ -159,6 +168,13 @@ public class aqhaConfiguration {
     }
 
     /**
+     * @return the asgHealthCheckGracePeriod
+     */
+    public Integer getAsgHealthCheckGracePeriod() {
+        return asgHealthCheckGracePeriod;
+    }
+
+    /**
      * @return the subnetIds
      */
     public List<String> getSubnetIds() {
@@ -212,6 +228,20 @@ public class aqhaConfiguration {
      */
     public Integer getApplicationAvailabilityWait() {
         return applicationAvailabilityWait;
+    }
+
+    /**
+     * @return the applicationDestructionTimeout
+     */
+    public Integer getApplicationDestructionTimeout() {
+        return applicationDestructionTimeout;
+    }
+
+    /**
+     * @return the applicationDestructionWait
+     */
+    public Integer getApplicationDestructionWait() {
+        return applicationDestructionWait;
     }
 
     /**

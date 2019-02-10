@@ -29,7 +29,12 @@ public class aqhaAutoScalingGroup {
     
     public aqhaAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
         this.autoScalingGroup = autoScalingGroup;
-        this.loadBalancersAttached = Boolean.FALSE;
+        if(autoScalingGroup.getTargetGroupARNs().size() > 0 ||
+                autoScalingGroup.getLoadBalancerNames().size() > 0) {
+            this.loadBalancersAttached = Boolean.TRUE;
+        } else {
+            this.loadBalancersAttached = Boolean.FALSE;
+        }
     }
 
     public void attachLoadBalancers(aqhaConfiguration configuration) {
@@ -181,10 +186,14 @@ public class aqhaAutoScalingGroup {
         CreateAutoScalingGroupRequest request = new CreateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(autoScalingGroupName)
                 .withLaunchTemplate(spec)
+                .withHealthCheckType(configuration.hasLoadBalancers() ? "ELB" : "EC2")
                 .withMaxSize(configuration.getMaxSize())
                 .withMinSize(configuration.getMinSize())
                 .withDesiredCapacity(configuration.getDesiredCapacity())
                 .withVPCZoneIdentifier(String.join(",", configuration.getSubnetIds()));
+        if(configuration.hasLoadBalancers()) {
+            request.setHealthCheckGracePeriod(configuration.getAsgHealthCheckGracePeriod());
+        }
         client.createAutoScalingGroup(request);
         
         return new aqhaAutoScalingGroup(retrieveAutoScalingGroups(configuration,

@@ -13,9 +13,9 @@ Application deployment utility to perform highly available blue green deployment
    1. ~~Blue Green~~
    1. Rolling
    1. Downtime
-1. True HA for Blue Green
+1. ~~True HA for Blue Green~~
    1. ~~Tests of health check succeed prior to swapping out ASGs in load balancers~~
-   1. Full connection drain wait
+   1. ~~Full connection drain wait~~
 1. ~~Injectible Health check / Availability check~~
 1. ~~Injectible user data~~
    1.  ~~Support for chef-solo instance bootstraping including S3 config data object creation~~

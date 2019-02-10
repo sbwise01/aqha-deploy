@@ -3,13 +3,16 @@
     "stackName": "production",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0cd4c6862a051af49",
+    "amiId": "ami-0f157902c59e79261",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
     "desiredCapacity": 1,
+    "asgHealthCheckGracePeriod": 300,
     "applicationAvailabilityTimeout": 300,
     "applicationAvailabilityWait": 10,
+    "applicationDestructionTimeout": 600,
+    "applicationDestructionWait": 10,
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
     "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
@@ -33,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/59fb03de901d7751"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/65c5c7f424fb2799"
     ]
 }
