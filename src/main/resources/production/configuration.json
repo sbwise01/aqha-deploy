@@ -36,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/717828c4eba8bb1b"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/50b62bf89cc4412d"
     ]
 }

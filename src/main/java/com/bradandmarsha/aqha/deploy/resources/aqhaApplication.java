@@ -16,12 +16,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author sbwise01
  */
 public class aqhaApplication {
+    private static final Logger LOGGER = Logger.getLogger(aqhaApplication.class);
+
     private final aqhaConfiguration configuration;
     private String applicationInstanceId;
     private aqhaLaunchTemplate launchTemplate;
@@ -75,7 +78,7 @@ public class aqhaApplication {
 
         //Verify instance health
         if(verifyInstanceHealth(applicationAvailabilityStopwatch)) {
-            System.out.println("All instances became healthy in " +
+            LOGGER.info("All instances became healthy in " +
                     applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
                     " seconds");
         } else {
@@ -96,7 +99,7 @@ public class aqhaApplication {
 
     public Boolean verifyLoadBalancerHealth(Stopwatch applicationAvailabilityStopwatch) {
         if (configuration.hasLoadBalancers()) {
-            System.out.println("Verifying load balancer health");
+            LOGGER.info("Verifying load balancer health");
             List<String> instanceIds = autoScalingGroup.getInstanceIds(configuration);
             if (configuration.getTargetGroupARNs() != null) {
                 com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient
@@ -104,7 +107,7 @@ public class aqhaApplication {
                 Integer healthyTargetGroups = 0;
                 while(healthyTargetGroups < configuration.getTargetGroupARNs().size() &&
                         applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
-                    System.out.println("Healthy target groups " + healthyTargetGroups +
+                    LOGGER.info("Healthy target groups " + healthyTargetGroups +
                             " is less than number of target groups " +
                             configuration.getTargetGroupARNs().size() + " ... waiting " +
                             configuration.getApplicationAvailabilityWait() +
@@ -113,7 +116,7 @@ public class aqhaApplication {
                     try {
                         TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
                     } catch (InterruptedException ex) {
-                        System.out.println("Application availability wait exception " + ex.getMessage());
+                        LOGGER.warn("Application availability wait exception ", ex);
                     }
                     healthyTargetGroups = 0;
                     for(String tgArn : configuration.getTargetGroupARNs()) {
@@ -134,7 +137,7 @@ public class aqhaApplication {
                 }
 
                 if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
-                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                    LOGGER.error("Application " + autoScalingGroup.getAutoScalingGroupName() +
                             " did not become avaialble before timeout " +
                             configuration.getApplicationAvailabilityTimeout());
                     return Boolean.FALSE;
@@ -145,7 +148,7 @@ public class aqhaApplication {
                 Integer healthyElbs = 0;
                 while(healthyElbs < configuration.getElbClassicNames().size() &&
                         applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
-                    System.out.println("Healthy ELB classics " + healthyElbs +
+                    LOGGER.info("Healthy ELB classics " + healthyElbs +
                             " is less than number of ELBs " +
                             configuration.getElbClassicNames().size() + " ... waiting " +
                             configuration.getApplicationAvailabilityWait() +
@@ -154,7 +157,7 @@ public class aqhaApplication {
                     try {
                         TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
                     } catch (InterruptedException ex) {
-                        System.out.println("Application availability wait exception " + ex.getMessage());
+                        LOGGER.warn("Application availability wait exception ", ex);
                     }
                     healthyElbs = 0;
                     for(String elbName : configuration.getElbClassicNames()) {
@@ -175,7 +178,7 @@ public class aqhaApplication {
                 }
 
                 if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
-                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                    LOGGER.error("Application " + autoScalingGroup.getAutoScalingGroupName() +
                             " did not become avaialble before timeout " +
                             configuration.getApplicationAvailabilityTimeout());
                     return Boolean.FALSE;
@@ -187,7 +190,7 @@ public class aqhaApplication {
 
     public Boolean verifyLoadBalancerDrain(Stopwatch applicationDestructionStopwatch) {
         if (configuration.hasLoadBalancers()) {
-            System.out.println("Verifying load balancer drain");
+            LOGGER.info("Verifying load balancer drain");
             List<String> instanceIds = autoScalingGroup.getInstanceIds(configuration);
             if (configuration.getTargetGroupARNs() != null) {
                 com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient
@@ -195,7 +198,7 @@ public class aqhaApplication {
                 Integer drainedTargetGroups = 0;
                 while(drainedTargetGroups < configuration.getTargetGroupARNs().size() &&
                         applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
-                    System.out.println("Drained target groups " + drainedTargetGroups +
+                    LOGGER.info("Drained target groups " + drainedTargetGroups +
                             " is less than number of target groups " +
                             configuration.getTargetGroupARNs().size() + " ... waiting " +
                             configuration.getApplicationDestructionWait() +
@@ -204,7 +207,7 @@ public class aqhaApplication {
                     try {
                         TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
                     } catch (InterruptedException ex) {
-                        System.out.println("Application destruction wait exception " + ex.getMessage());
+                        LOGGER.warn("Application destruction wait exception ", ex);
                     }
                     drainedTargetGroups = 0;
                     for(String tgArn : configuration.getTargetGroupARNs()) {
@@ -224,7 +227,7 @@ public class aqhaApplication {
                 }
 
                 if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
-                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                    LOGGER.error("Application " + autoScalingGroup.getAutoScalingGroupName() +
                             " did not drain before timeout " +
                             configuration.getApplicationDestructionTimeout());
                     return Boolean.FALSE;
@@ -235,7 +238,7 @@ public class aqhaApplication {
                 Integer drainedElbs = 0;
                 while(drainedElbs < configuration.getElbClassicNames().size() &&
                         applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
-                    System.out.println("Drained ELB classics " + drainedElbs +
+                    LOGGER.info("Drained ELB classics " + drainedElbs +
                             " is less than number of ELBs " +
                             configuration.getElbClassicNames().size() + " ... waiting " +
                             configuration.getApplicationDestructionWait() +
@@ -244,7 +247,7 @@ public class aqhaApplication {
                     try {
                         TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
                     } catch (InterruptedException ex) {
-                        System.out.println("Application destruction wait exception " + ex.getMessage());
+                        LOGGER.warn("Application destruction wait exception ", ex);
                     }
                     drainedElbs = 0;
                     for(String elbName : configuration.getElbClassicNames()) {
@@ -264,7 +267,7 @@ public class aqhaApplication {
                 }
 
                 if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
-                    System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+                    LOGGER.error("Application " + autoScalingGroup.getAutoScalingGroupName() +
                             " did not drain before timeout " +
                             configuration.getApplicationAvailabilityTimeout());
                     return Boolean.FALSE;

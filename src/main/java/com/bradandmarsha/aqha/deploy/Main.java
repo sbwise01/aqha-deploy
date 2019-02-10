@@ -2,6 +2,7 @@ package com.bradandmarsha.aqha.deploy;
 
 import com.bradandmarsha.aqha.deploy.resources.aqhaApplication;
 import com.bradandmarsha.aqha.deploy.strategies.DeploymentStrategy;
+import com.bradandmarsha.aqha.deploy.utils.Log4jHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +12,19 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author sbwise01
  */
 public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class);
+
     public static void main(String[] args) throws IOException, ParseException, aqhaDeploymentException {
+        // Configure logging
+        Log4jHelper.configureLogging();
+
         //Parse command line arguments
         Options options = new Options();
         options.addRequiredOption("c", "configuration", true, "Path to json file containing application configuration information.");
@@ -32,14 +39,13 @@ public class Main {
         //Fetch all current application instances from account
         List<aqhaApplication> applications = aqhaApplication.retrieveAqhaApplications(configuration);
         applications.forEach((app) -> {
-            System.out.println("Found application: " + app.toString());
+            LOGGER.info("Found application: " + app.toString());
         });
         
         //Check for prior failed deployment
         if (applications.size() > 1) {
-            //TODO:  convert to using logger
             //Prior deployment error ... fail and report
-            System.out.println("Found " + applications.size() + " instances of application " +
+            LOGGER.error("Found " + applications.size() + " instances of application " +
                     configuration.getApplicationName() + " for stack " +
                     configuration.getStackName() + ".  Expected to find 1 instance.");
             System.exit(1);
@@ -47,7 +53,7 @@ public class Main {
         
         //Check for no deployments to destroy
         if (applications.size() < 1 && cmd.hasOption("d")) {
-            System.out.println("Didn't find application " + configuration.getApplicationName() +
+            LOGGER.error("Didn't find application " + configuration.getApplicationName() +
                     " for stack " + configuration.getStackName() +
                     " to destroy ... exiting.");
             System.exit(2);
@@ -63,6 +69,6 @@ public class Main {
         //Execute deployment
         strategy.deploy();
 
-        System.out.println("Finished.");
+        LOGGER.info("Finished.");
     }
 }

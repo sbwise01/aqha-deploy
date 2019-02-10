@@ -22,12 +22,15 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author sbwise01
  */
 public class aqhaEC2Instance {
+    private static final Logger LOGGER = Logger.getLogger(aqhaEC2Instance.class);
+
     private final Instance instance;
 
     public aqhaEC2Instance(Instance instance) {
@@ -79,7 +82,7 @@ public class aqhaEC2Instance {
                 String host = configuration.getInstanceHealthCheck().getUsePublicAddress() ?
                         instance.getPublicIpAddress() : instance.getPrivateIpAddress();
                 String url = configuration.getInstanceHealthCheck().getHealthCheckUrl(host);
-                System.out.println("Checking instance health on instance " +
+                LOGGER.info("Checking instance health on instance " +
                         instance.getInstanceId() + " with url " + url);
                 HttpResponse response = client.execute(new HttpHead(url));
                 isHealthy = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
@@ -87,7 +90,7 @@ public class aqhaEC2Instance {
                 //Close HTTP client
                 client.close();
             } catch(NoSuchAlgorithmException | KeyStoreException | KeyManagementException | URISyntaxException | IOException e) {
-                System.out.println("Exception checking instance health:  " + e.getMessage());
+                LOGGER.error("Exception checking instance health:  " + e.getClass().getCanonicalName());
                 isHealthy = Boolean.FALSE;
             }
         }

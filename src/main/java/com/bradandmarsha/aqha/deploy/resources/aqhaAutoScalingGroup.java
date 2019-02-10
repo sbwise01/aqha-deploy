@@ -19,12 +19,15 @@ import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author sbwise01
  */
 public class aqhaAutoScalingGroup {
+    private static final Logger LOGGER = Logger.getLogger(aqhaAutoScalingGroup.class);
+
     private AutoScalingGroup autoScalingGroup;
     private Boolean loadBalancersAttached;
     
@@ -79,7 +82,7 @@ public class aqhaAutoScalingGroup {
     }
 
     public void destroy(Stopwatch applicationDestructionStopwatch, aqhaConfiguration configuration) {
-        System.out.println("Destroying auto scaling group");
+        LOGGER.info("Destroying auto scaling group");
         AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
 
         //Scale down to 0 instances
@@ -97,7 +100,7 @@ public class aqhaAutoScalingGroup {
         );
         while(tmpAsg.getInstanceIds(configuration).size() > 0 &&
                 applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
-            System.out.println("ASG scale down not complete for " +
+            LOGGER.info("ASG scale down not complete for " +
                     autoScalingGroup.getAutoScalingGroupName() + " ... wating " +
                     configuration.getApplicationDestructionWait() + " seconds ... elapsed time is " +
                     applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) +
@@ -105,7 +108,7 @@ public class aqhaAutoScalingGroup {
             try {
                 TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
             } catch (InterruptedException ex) {
-                System.out.println("Application destruction wait exception " + ex.getMessage());
+                LOGGER.warn("Application destruction wait exception ", ex);
             }
             tmpAsg = new aqhaAutoScalingGroup(retrieveAutoScalingGroups(configuration,
                     autoScalingGroup.getAutoScalingGroupName()).get(0).getAutoScalingGroup()
@@ -116,29 +119,32 @@ public class aqhaAutoScalingGroup {
         DeleteAutoScalingGroupRequest request = new DeleteAutoScalingGroupRequest()
                 .withAutoScalingGroupName(autoScalingGroup.getAutoScalingGroupName());
         if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
-            System.out.println("Auto scaling group " + autoScalingGroup.getAutoScalingGroupName() +
+            LOGGER.warn("Auto scaling group " + autoScalingGroup.getAutoScalingGroupName() +
                     " did not scale down to 0 instances before timeout " +
                     configuration.getApplicationDestructionTimeout() +
                     " ... adding ForceDelete option to deletion of ASG");
             request.setForceDelete(Boolean.TRUE);
         }
         client.deleteAutoScalingGroup(request);
+        LOGGER.info("Completed destroy of auto scaling group in " +
+                applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) +
+                " seconds.");
     }
     
     public Boolean verifyInstanceHealth(Stopwatch applicationAvailabilityStopwatch,
             aqhaConfiguration configuration) throws aqhaDeploymentException {
-        System.out.println("Verifying instance health");
+        LOGGER.info("Verifying instance health");
         Stopwatch reservationStopwatch = Stopwatch.createStarted();
         while(autoScalingGroup.getInstances().size() < configuration.getMinSize() &&
                 reservationStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getInstanceReservationTimeout()) {
-            System.out.println("Instance reservations not complete ... wating " +
+            LOGGER.info("Instance reservations not complete ... wating " +
                     configuration.getInstanceReservationWait() + " seconds ... elapsed time is " +
                     applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
                     " seconds");
             try {
                 TimeUnit.SECONDS.sleep(configuration.getInstanceReservationWait());
             } catch (InterruptedException ex) {
-                System.out.println("Instance reservation wait exception " + ex.getMessage());
+                LOGGER.warn("Instance reservation wait exception ", ex);
             }
             List<AutoScalingGroup> asgs = retrieveASGs(configuration, autoScalingGroup.getAutoScalingGroupName());
             if(asgs.size() != 1) {
@@ -148,26 +154,26 @@ public class aqhaAutoScalingGroup {
         }
 
         if(reservationStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getInstanceReservationTimeout()) {
-            System.out.println("Instance reservations did not complete before timeout " +
+            LOGGER.error("Instance reservations did not complete before timeout " +
                     configuration.getInstanceReservationTimeout());
             return Boolean.FALSE;
         }
 
-        System.out.println("Instance reservations completed in " +
+        LOGGER.info("Instance reservations completed in " +
                 reservationStopwatch.elapsed(TimeUnit.SECONDS) + " seconds");
 
         List<aqhaEC2Instance> instances = aqhaEC2Instance.getInstances(configuration, getInstanceIds(configuration));
         Integer healthyInstances = 0;
         while(healthyInstances < configuration.getMinSize() &&
                 applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationAvailabilityTimeout()) {
-            System.out.println("Healthy instances " + healthyInstances + " is less than minimum size " +
+            LOGGER.info("Healthy instances " + healthyInstances + " is less than minimum size " +
                     configuration.getMinSize() + " ... waiting " + configuration.getApplicationAvailabilityWait() +
                     " seconds ... elapsed time is " + applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) +
                     " seconds");
             try {
                 TimeUnit.SECONDS.sleep(configuration.getApplicationAvailabilityWait());
             } catch (InterruptedException ex) {
-                System.out.println("Application availability wait exception " + ex.getMessage());
+                LOGGER.warn("Application availability wait exception ", ex);
             }
             healthyInstances = 0;
             for(aqhaEC2Instance instance : instances) {
@@ -178,7 +184,7 @@ public class aqhaAutoScalingGroup {
         }
 
         if(applicationAvailabilityStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationAvailabilityTimeout()) {
-            System.out.println("Application " + autoScalingGroup.getAutoScalingGroupName() +
+            LOGGER.error("Application " + autoScalingGroup.getAutoScalingGroupName() +
                     " did not become avaialble before timeout " +
                     configuration.getApplicationAvailabilityTimeout());
             return Boolean.FALSE;

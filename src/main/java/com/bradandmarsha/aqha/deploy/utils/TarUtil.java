@@ -8,12 +8,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author sbwise01
  */
 public class TarUtil {
+    private static final Logger LOGGER = Logger.getLogger(TarUtil.class);
+
     public static void compressDirectoryChildren(String archiveName, String directory) throws IOException {
         File dir = new File(directory);
         File[] children = dir.listFiles();
@@ -53,7 +56,7 @@ public class TarUtil {
                 }
             }
         } else {
-            System.out.println(file.getName() + " is not supported");
+            LOGGER.info(file.getName() + " is not supported");
         }
     }
 }
