@@ -27,5 +27,5 @@ Application deployment utility to perform highly available blue green deployment
    1. Rolling
    1. Downtime
 1. Configuration generation utility
-  1.  Use of defaults/overrides for multi-application / multi-stack deployment management
+   1.  Use of defaults/overrides for multi-application / multi-stack deployment management
 1. Auto-renewing assume role for deployment to address session duration limits
