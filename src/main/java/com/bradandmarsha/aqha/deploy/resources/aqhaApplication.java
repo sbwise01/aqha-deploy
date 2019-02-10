@@ -280,9 +280,9 @@ public class aqhaApplication {
         }
     }
 
-    public void destroy() {
+    public void destroy(Stopwatch applicationDestructionStopwatch) {
         //Destroy AutoScalingGroup
-        autoScalingGroup.destroy(configuration);
+        autoScalingGroup.destroy(applicationDestructionStopwatch, configuration);
 
         //Destroy LaunchTemplate
         launchTemplate.destroy(configuration);

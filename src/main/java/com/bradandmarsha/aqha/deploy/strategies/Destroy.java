@@ -29,6 +29,6 @@ public class Destroy extends DeploymentStrategy {
             System.out.println("Destroying application " + this.getOldApplication().getApplicationFullName() +
                     " did not fully drain from load balancers  ... proceeding with destroy");
         }
-        this.getOldApplication().destroy();
+        this.getOldApplication().destroy(applicationDestructionStopwatch);
     }
 }

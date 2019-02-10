@@ -10,6 +10,7 @@ import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.DetachLoadBalancerTargetGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DetachLoadBalancersRequest;
 import com.amazonaws.services.autoscaling.model.LaunchTemplateSpecification;
+import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.ec2.model.LaunchTemplate;
 import com.bradandmarsha.aqha.deploy.aqhaConfiguration;
 import com.bradandmarsha.aqha.deploy.aqhaDeploymentException;
@@ -77,19 +78,55 @@ public class aqhaAutoScalingGroup {
         }
     }
 
-    public void destroy(aqhaConfiguration configuration) {
+    public void destroy(Stopwatch applicationDestructionStopwatch, aqhaConfiguration configuration) {
+        System.out.println("Destroying auto scaling group");
         AmazonAutoScalingClient client = Client.getAutoScalingClient(configuration.getRegion());
-        DeleteAutoScalingGroupRequest request = new DeleteAutoScalingGroupRequest()
+
+        //Scale down to 0 instances
+        UpdateAutoScalingGroupRequest updateRequest = new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(autoScalingGroup.getAutoScalingGroupName())
-                //TODO change this to use a normal progress delete.
-                .withForceDelete(Boolean.TRUE);
+                .withMaxSize(0)
+                .withMinSize(0)
+                .withDesiredCapacity(0);
+        client.updateAutoScalingGroup(updateRequest);
+
+        //Wait for scaling to complete
+        aqhaAutoScalingGroup tmpAsg = new aqhaAutoScalingGroup(
+                retrieveAutoScalingGroups(configuration,
+                        autoScalingGroup.getAutoScalingGroupName()).get(0).getAutoScalingGroup()
+        );
+        while(tmpAsg.getInstanceIds(configuration).size() > 0 &&
+                applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) <= configuration.getApplicationDestructionTimeout()) {
+            System.out.println("ASG scale down not complete for " +
+                    autoScalingGroup.getAutoScalingGroupName() + " ... wating " +
+                    configuration.getApplicationDestructionWait() + " seconds ... elapsed time is " +
+                    applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) +
+                    " seconds");
+            try {
+                TimeUnit.SECONDS.sleep(configuration.getApplicationDestructionWait());
+            } catch (InterruptedException ex) {
+                System.out.println("Application destruction wait exception " + ex.getMessage());
+            }
+            tmpAsg = new aqhaAutoScalingGroup(retrieveAutoScalingGroups(configuration,
+                    autoScalingGroup.getAutoScalingGroupName()).get(0).getAutoScalingGroup()
+            );
+        }
+
+        //Delete ASG
+        DeleteAutoScalingGroupRequest request = new DeleteAutoScalingGroupRequest()
+                .withAutoScalingGroupName(autoScalingGroup.getAutoScalingGroupName());
+        if(applicationDestructionStopwatch.elapsed(TimeUnit.SECONDS) > configuration.getApplicationDestructionTimeout()) {
+            System.out.println("Auto scaling group " + autoScalingGroup.getAutoScalingGroupName() +
+                    " did not scale down to 0 instances before timeout " +
+                    configuration.getApplicationDestructionTimeout() +
+                    " ... adding ForceDelete option to deletion of ASG");
+            request.setForceDelete(Boolean.TRUE);
+        }
         client.deleteAutoScalingGroup(request);
     }
     
     public Boolean verifyInstanceHealth(Stopwatch applicationAvailabilityStopwatch,
             aqhaConfiguration configuration) throws aqhaDeploymentException {
-        //TODO:  Instance Health is acheived once all instances pass optional
-        //       instance health check and/or startup hook
         System.out.println("Verifying instance health");
         Stopwatch reservationStopwatch = Stopwatch.createStarted();
         while(autoScalingGroup.getInstances().size() < configuration.getMinSize() &&

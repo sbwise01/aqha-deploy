@@ -3,7 +3,7 @@
     "stackName": "production",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0f157902c59e79261",
+    "amiId": "ami-0f858e6a3772bc887",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -36,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/65c5c7f424fb2799"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/717828c4eba8bb1b"
     ]
 }
