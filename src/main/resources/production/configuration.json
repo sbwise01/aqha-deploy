@@ -3,7 +3,7 @@
     "stackName": "production",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0f858e6a3772bc887",
+    "amiId": "ami-0e2a1105859b4283c",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -15,7 +15,7 @@
     "applicationDestructionWait": 10,
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
-    "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
+    "roleNameForInstanceProfile": "brad-ip-test",
     "aqhaInstanceHealthCheck": {
         "protocol": "http",
         "port": 80,
@@ -25,7 +25,7 @@
     "aqhaChefSoloBootstrap": {
         "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/production/chef",
         "bucket": "brad-chef-bootstrap",
-        "key": "production.tar.gz"
+        "kmsKeyId": "arn:aws:kms:us-west-2:690648134111:key/e05f1533-1618-42cf-8e76-36305e3870ff"
     },
     "subnetIds": [
         "subnet-7af9ec33",
@@ -36,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/50b62bf89cc4412d"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/a6ad4203e8ef6ef7"
     ]
 }

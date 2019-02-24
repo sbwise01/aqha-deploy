@@ -29,7 +29,7 @@ public class aqhaConfiguration {
     private final List<String> subnetIds;
     private final List<String> securityGroupIds;
     private final aqhaChefSoloBootstrap chefSoloBootstrap;
-    private final String instanceProfile;
+    private final String roleNameForInstanceProfile;
     private final List<String> targetGroupARNs;
     private final List<String> elbClassicNames;
     private final Integer applicationAvailabilityTimeout;
@@ -54,7 +54,7 @@ public class aqhaConfiguration {
             @JsonProperty("subnetIds") List<String> subnetIds,
             @JsonProperty("securityGroupIds") List<String> securityGroupIds,
             @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
-            @JsonProperty("instanceProfile") String instanceProfile,
+            @JsonProperty("roleNameForInstanceProfile") String roleNameForInstanceProfile,
             @JsonProperty("targetGroupARNs") List<String> targetGroupARNs,
             @JsonProperty("elbClassicNames") List<String> elbClassicNames,
             @JsonProperty("applicationAvailabilityTimeout") Integer applicationAvailabilityTimeout,
@@ -77,7 +77,7 @@ public class aqhaConfiguration {
         this.subnetIds = subnetIds;
         this.securityGroupIds = securityGroupIds;
         this.chefSoloBootstrap = chefSoloBootstrap;
-        this.instanceProfile = instanceProfile;
+        this.roleNameForInstanceProfile = roleNameForInstanceProfile;
         this.targetGroupARNs = targetGroupARNs;
         this.elbClassicNames = elbClassicNames;
         this.applicationAvailabilityTimeout = applicationAvailabilityTimeout;
@@ -196,10 +196,10 @@ public class aqhaConfiguration {
     }
 
     /**
-     * @return the instanceProfile
+     * @return the roleNameForInstanceProfile
      */
-    public String getInstanceProfile() {
-        return instanceProfile;
+    public String getRoleNameForInstanceProfile() {
+        return roleNameForInstanceProfile;
     }
 
     /**

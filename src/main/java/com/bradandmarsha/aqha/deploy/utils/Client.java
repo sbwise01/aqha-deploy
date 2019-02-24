@@ -6,6 +6,10 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
+import com.amazonaws.services.kms.AWSKMSClient;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
@@ -46,6 +50,20 @@ public class Client {
     public static com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient getElbV2Client(String region) {
         return (com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient)
                 com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClientBuilder
+                .standard()
+                .withRegion(region)
+                .build();
+    }
+
+    public static AWSKMSClient getKmsClient(String region) {
+        return (AWSKMSClient) AWSKMSClientBuilder
+                .standard()
+                .withRegion(region)
+                .build();
+    }
+
+    public static AmazonIdentityManagementClient getIamClient(String region) {
+        return (AmazonIdentityManagementClient) AmazonIdentityManagementClientBuilder
                 .standard()
                 .withRegion(region)
                 .build();

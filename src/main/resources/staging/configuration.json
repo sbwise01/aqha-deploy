@@ -3,7 +3,7 @@
     "stackName": "staging",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0f157902c59e79261",
+    "amiId": "ami-0e2a1105859b4283c",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -15,7 +15,7 @@
     "applicationDestructionWait": 10,
     "instanceReservationTimeout": 60,
     "instanceReservationWait": 10,
-    "instanceProfile": "arn:aws:iam::690648134111:instance-profile/brad-ip-test",
+    "roleNameForInstanceProfile": "brad-ip-test-2",
     "aqhaInstanceHealthCheck": {
         "protocol": "http",
         "port": 80,
@@ -25,7 +25,7 @@
     "aqhaChefSoloBootstrap": {
         "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/staging/chef",
         "bucket": "brad-chef-bootstrap",
-        "key": "staging.tar.gz"
+        "kmsKeyId": "arn:aws:kms:us-west-2:690648134111:key/e05f1533-1618-42cf-8e76-36305e3870ff"
     },
     "subnetIds": [
         "subnet-7af9ec33",

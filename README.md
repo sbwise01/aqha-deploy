@@ -20,7 +20,7 @@ Application deployment utility to perform highly available blue green deployment
 1. ~~Cookbook for chef-solo instance bootstrap utility~~
 1. Support startup and shutdown hooks
 1. ~~Instance Profile~~
-1. KMS key grants for S3 config data object
+1. ~~KMS key grants for S3 config data object~~
 
 ## Additional desired features
 1. Deployment strategies

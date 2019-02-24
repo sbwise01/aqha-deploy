@@ -89,10 +89,10 @@ public class aqhaLaunchTemplate {
             launchTemplateData.setUserData(Base64.getEncoder().encodeToString(userData.toJSONString().getBytes()));
         }
         //Add instance profile
-        if (configuration.getInstanceProfile() != null) {
+        if (configuration.getRoleNameForInstanceProfile() != null) {
             LaunchTemplateIamInstanceProfileSpecificationRequest iamInstanceProfile =
                     new LaunchTemplateIamInstanceProfileSpecificationRequest()
-                    .withArn(configuration.getInstanceProfile());
+                    .withArn(aqhaIamRole.getInstanceProfileArn(configuration));
             launchTemplateData.setIamInstanceProfile(iamInstanceProfile);
         }
         CreateLaunchTemplateRequest request = new CreateLaunchTemplateRequest()
