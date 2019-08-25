@@ -1,6 +1,6 @@
 package com.bradandmarsha.aqha.deploy;
 
-import com.bradandmarsha.aqha.deploy.resources.aqhaChefSoloBootstrap;
+import com.bradandmarsha.aqha.deploy.resources.aqhaUserDataBootstrap;
 import com.bradandmarsha.aqha.deploy.resources.aqhaInstanceHealthCheck;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,7 +28,7 @@ public class aqhaConfiguration {
     private final Integer asgHealthCheckGracePeriod;
     private final List<String> subnetIds;
     private final List<String> securityGroupIds;
-    private final aqhaChefSoloBootstrap chefSoloBootstrap;
+    private final aqhaUserDataBootstrap userDataBootstrap;
     private final String roleNameForInstanceProfile;
     private final List<String> targetGroupARNs;
     private final List<String> elbClassicNames;
@@ -53,7 +53,7 @@ public class aqhaConfiguration {
             @JsonProperty("asgHealthCheckGracePeriod") Integer asgHealthCheckGracePeriod,
             @JsonProperty("subnetIds") List<String> subnetIds,
             @JsonProperty("securityGroupIds") List<String> securityGroupIds,
-            @JsonProperty("aqhaChefSoloBootstrap") aqhaChefSoloBootstrap chefSoloBootstrap,
+            @JsonProperty("aqhaUserDataBootstrap") aqhaUserDataBootstrap userDataBootstrap,
             @JsonProperty("roleNameForInstanceProfile") String roleNameForInstanceProfile,
             @JsonProperty("targetGroupARNs") List<String> targetGroupARNs,
             @JsonProperty("elbClassicNames") List<String> elbClassicNames,
@@ -76,7 +76,7 @@ public class aqhaConfiguration {
         this.asgHealthCheckGracePeriod = asgHealthCheckGracePeriod;
         this.subnetIds = subnetIds;
         this.securityGroupIds = securityGroupIds;
-        this.chefSoloBootstrap = chefSoloBootstrap;
+        this.userDataBootstrap = userDataBootstrap;
         this.roleNameForInstanceProfile = roleNameForInstanceProfile;
         this.targetGroupARNs = targetGroupARNs;
         this.elbClassicNames = elbClassicNames;
@@ -189,10 +189,10 @@ public class aqhaConfiguration {
     }
 
     /**
-     * @return the chefSoloBootstrap
+     * @return the userDataBootstrap
      */
-    public aqhaChefSoloBootstrap getChefSoloBootstrap() {
-        return chefSoloBootstrap;
+    public aqhaUserDataBootstrap getUserDataBootstrap() {
+        return userDataBootstrap;
     }
 
     /**

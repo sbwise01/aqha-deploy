@@ -3,7 +3,7 @@
     "stackName": "production",
     "region": "us-west-2",
     "instanceType": "t2.small",
-    "amiId": "ami-0e2a1105859b4283c",
+    "amiId": "ami-07236501210a1ceef",
     "keyName": "bwise-keypair",
     "maxSize": 1,
     "minSize": 1,
@@ -22,10 +22,10 @@
         "path": "/meta/health",
         "usePublicAddress": true
     },
-    "aqhaChefSoloBootstrap": {
+    "aqhaUserDataBootstrap": {
         "configurationDirectory": "/Users/bwise/src/public_github/aqha-example-deploy/production/chef",
-        "bucket": "brad-chef-bootstrap",
-        "kmsKeyId": "arn:aws:kms:us-west-2:690648134111:key/e05f1533-1618-42cf-8e76-36305e3870ff"
+        "bucket": "brad-user-data-bootstrap",
+        "kmsKeyId": "arn:aws:kms:us-west-2:690648134111:key/1c5dd867-8531-46b3-afa3-de5e52b78ef7"
     },
     "subnetIds": [
         "subnet-7af9ec33",
@@ -36,6 +36,6 @@
         "sg-08ba1c668aa7b453c"
     ],
     "targetGroupARNs": [
-        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/example-web-app-tg/a6ad4203e8ef6ef7"
+        "arn:aws:elasticloadbalancing:us-west-2:690648134111:targetgroup/bwise-web-app-tg/316b8b7f07808fcf"
     ]
 }

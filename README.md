@@ -17,7 +17,9 @@ Application deployment utility to perform highly available blue green deployment
 1. ~~Injectible Health check / Availability check~~
 1. ~~Injectible user data~~
    1.  ~~Support for chef-solo instance bootstraping including S3 config data object creation~~
+   1.  ~~Support for ansible instance bootstraping including S3 config data object creation~~
 1. ~~Cookbook for chef-solo instance bootstrap utility~~
+1. ~~Role for ansible instance bootstrap utility~~
 1. Support startup and shutdown hooks
 1. ~~Instance Profile~~
 1. ~~KMS key grants for S3 config data object~~

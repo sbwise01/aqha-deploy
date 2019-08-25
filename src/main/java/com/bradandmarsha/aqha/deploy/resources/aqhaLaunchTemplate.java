@@ -36,8 +36,8 @@ public class aqhaLaunchTemplate {
         DeleteLaunchTemplateRequest request = new DeleteLaunchTemplateRequest()
                 .withLaunchTemplateId(launchTemplate.getLaunchTemplateId());
         client.deleteLaunchTemplate(request);
-        if (configuration.getChefSoloBootstrap() != null) {
-            configuration.getChefSoloBootstrap().destroyConfiguration(configuration, getLaunchTemplateName());
+        if (configuration.getUserDataBootstrap() != null) {
+            configuration.getUserDataBootstrap().destroyConfiguration(configuration, getLaunchTemplateName());
         }
     }
 
@@ -81,11 +81,11 @@ public class aqhaLaunchTemplate {
                 .withSecurityGroupIds(configuration.getSecurityGroupIds())
                 .withKeyName(configuration.getKeyName());
         //Add user data
-        if (configuration.getChefSoloBootstrap() != null) {
-            configuration.getChefSoloBootstrap().uploadConfiguration(configuration, launchTemplateName);
+        if (configuration.getUserDataBootstrap() != null) {
+            configuration.getUserDataBootstrap().uploadConfiguration(configuration, launchTemplateName);
             JSONObject userData = new JSONObject();
-            userData.put("bucket", configuration.getChefSoloBootstrap().getBucket());
-            userData.put("key", configuration.getChefSoloBootstrap().getKey(launchTemplateName));
+            userData.put("bucket", configuration.getUserDataBootstrap().getBucket());
+            userData.put("key", configuration.getUserDataBootstrap().getKey(launchTemplateName));
             launchTemplateData.setUserData(Base64.getEncoder().encodeToString(userData.toJSONString().getBytes()));
         }
         //Add instance profile

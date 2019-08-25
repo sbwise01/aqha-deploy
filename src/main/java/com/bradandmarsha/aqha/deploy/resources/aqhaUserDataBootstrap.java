@@ -28,13 +28,13 @@ import java.util.HashMap;
  * @author sbwise01
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class aqhaChefSoloBootstrap {
+public class aqhaUserDataBootstrap {
     private final String configurationDirectory;
     private final String bucket;
     private final String kmsKeyId;
 
     @JsonCreator
-    public aqhaChefSoloBootstrap(@JsonProperty("configurationDirectory") String configurationDirectory,
+    public aqhaUserDataBootstrap(@JsonProperty("configurationDirectory") String configurationDirectory,
             @JsonProperty("bucket") String bucket,
             @JsonProperty("kmsKeyId") String kmsKeyId) {
         this.configurationDirectory = configurationDirectory;
